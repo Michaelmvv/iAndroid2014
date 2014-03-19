@@ -48,6 +48,7 @@ public class Lada extends IRobotCreateAdapter {
      * @throws ConnectionLostException
      */
     public void loop() throws ConnectionLostException {
+    	driveDirect(100,  100);
         try {
             sonar.read();
         } catch (InterruptedException ex) {
