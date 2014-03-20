@@ -38,7 +38,7 @@ public class Lada extends IRobotCreateAdapter {
     public void initialize() throws ConnectionLostException {
         dashboard.log("===========Start===========");
         readSensors(SENSORS_GROUP_ID6);
-        dashboard.log("iAndroid2014 version 140319A");
+        dashboard.log("iAndroid2014 version 140319B");
         dashboard.log("Battery Charge = " + getBatteryCharge()
                 + ", 3,000 = Full charge");
     }
