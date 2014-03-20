@@ -9,7 +9,7 @@ import org.wintrisstech.sensors.UltraSonicSensors;
 /**
  * A Lada is an implementation of the IRobotCreateInterface, inspired by Vic's
  * awesome API. It is entirely event driven.
- *
+ * Version 140319B...mods by Vic
  * @author Erik
  */
 public class Lada extends IRobotCreateAdapter {
@@ -38,6 +38,7 @@ public class Lada extends IRobotCreateAdapter {
     public void initialize() throws ConnectionLostException {
         dashboard.log("===========Start===========");
         readSensors(SENSORS_GROUP_ID6);
+        dashboard.log("iAndroid2014 version 140319A");
         dashboard.log("Battery Charge = " + getBatteryCharge()
                 + ", 3,000 = Full charge");
     }
