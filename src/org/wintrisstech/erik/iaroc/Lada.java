@@ -2,19 +2,16 @@ package org.wintrisstech.erik.iaroc;
 
 import ioio.lib.api.IOIO;
 import ioio.lib.api.exception.ConnectionLostException;
-import org.wintrisstech.irobot.ioio.IRobotCreateAdapter;
-import org.wintrisstech.irobot.ioio.IRobotCreateInterface;
 import org.wintrisstech.sensors.UltraSonicSensors;
 
 /**
  * A Lada is an implementation of the IRobotCreateInterface, inspired by Vic's
  * awesome API. It is entirely event driven.
- * Version 140319B...mods by Vic
+ * Version 140323A...mods by Vic
  * @author Erik
  */
 public class Lada extends IRobotCreateAdapter {
 
-    private static final String TAG = "Lada";
     private final Dashboard dashboard;
     public UltraSonicSensors sonar;
 
@@ -32,7 +29,7 @@ public class Lada extends IRobotCreateAdapter {
         super(create);
         sonar = new UltraSonicSensors(ioio);
         this.dashboard = dashboard;
-        song(0, new int[]{58, 10});
+        //song(0, new int[]{58, 10});
     }
 
     public void initialize() throws ConnectionLostException {
@@ -50,12 +47,10 @@ public class Lada extends IRobotCreateAdapter {
      */
     public void loop() throws ConnectionLostException {
     	driveDirect(100,  100);
-        try {
-            sonar.read();
-        } catch (InterruptedException ex) {
-        }
-        dashboard.log("L: " + sonar.getLeftDistance()
-                + " F: " + sonar.getFrontDistance()
-                + " R: " + sonar.getRightDistance());
+//        try {
+//            //sonar.read();
+//        } catch (InterruptedException ex) {
+//        }
+        //dashboard.log("L: " + sonar.getLeftDistance() + " F: " + sonar.getFrontDistance() + " R: " + sonar.getRightDistance());
     }
 }

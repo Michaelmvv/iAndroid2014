@@ -7,9 +7,6 @@ import ioio.lib.util.android.IOIOActivity;
 
 import java.util.Locale;
 
-import org.wintrisstech.irobot.ioio.IRobotCreateInterface;
-import org.wintrisstech.irobot.ioio.SimpleIRobotCreate;
-
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.hardware.Sensor;
@@ -38,10 +35,6 @@ import android.widget.TextView;
 public class Dashboard extends IOIOActivity implements
 		TextToSpeech.OnInitListener, SensorEventListener {
 
-	/**
-	 * Tag used for debugging.
-	 */
-	private static final String TAG = "Dashboard";
 	/**
 	 * Text view that contains all logged messages
 	 */
