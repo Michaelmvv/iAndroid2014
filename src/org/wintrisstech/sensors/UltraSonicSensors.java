@@ -10,14 +10,11 @@ import ioio.lib.api.exception.ConnectionLostException;
 /**
  * An UltraSonicSensors instance is used to access three ultrasonic sensors
  * (leftInput, frontInput, and rightInput) and read the measurements from these sensors.
- *
  * @author Erik Colban
  */
 public class UltraSonicSensors {
-
-    private static final String TAG = "UltraSonicSensor";
     private static final float CONVERSION_FACTOR = 17280.0F; //cm / s
-    private static final int NUM_SAMPLES = 2;
+    private static final int NUM_SAMPLES = 10;
     private static final int LEFT_ULTRASONIC_INPUT_PIN = 35;
     private static final int FRONT_ULTRASONIC_INPUT_PIN = 36;
     private static final int RIGHT_ULTRASONIC_INPUT_PIN = 37;
@@ -33,10 +30,10 @@ public class UltraSonicSensors {
     private volatile int leftDistance;
     private volatile int frontDistance = 10;
     private volatile int rightDistance;
+    private IOIO ioio;
 
     /**
      * Constructor of a UltraSonicSensors instance.
-     *
      * @param ioio the IOIO instance used to communicate with the sensor
      * @throws ConnectionLostException
      *
@@ -48,28 +45,30 @@ public class UltraSonicSensors {
         this.leftStrobe = ioio.openDigitalOutput(LEFT_STROBE_ULTRASONIC_OUTPUT_PIN);//*******
         this.righttStrobe = ioio.openDigitalOutput(RIGHT_STROBE_ULTRASONIC_OUTPUT_PIN);//*******
         this.frontStrobe = ioio.openDigitalOutput(FRONT_STROBE_ULTRASONIC_OUTPUT_PIN);//*******
+        this.ioio = ioio;
     }
 
     /**
      * Makes a reading of the ultrasonic sensors and stores the results locally.
      * To access these readings, use {@link #getLeftDistance()},
      * {@link #getFrontDistance()}, and {@link #getRightDistance()}.
-     *
      * @throws ConnectionLostException
      * @throws InterruptedException
      */
     public void read() throws ConnectionLostException, InterruptedException {
         leftDistance = read(leftStrobe, leftInput);
-        frontDistance = read(frontStrobe, frontInput);
-        rightDistance = read(righttStrobe, rightInput);
+//        frontDistance = read(frontStrobe, frontInput);
+//        rightDistance = read(righttStrobe, rightInput);
     }
 
     private int read(DigitalOutput strobe, PulseInput input)
             throws ConnectionLostException, InterruptedException {
         int distance = 0;
         for (int i = 0; i < NUM_SAMPLES; i++) {
-            strobe.write(true);
-            strobe.write(false);
+            ioio.beginBatch();  // Start batching to prevent elongating strobe pulse
+            strobe.write(true);  
+            strobe.write(false); 
+            ioio.endBatch();
             distance += (int) (input.getDuration() * CONVERSION_FACTOR);
             SystemClock.sleep(100);
         }
@@ -78,7 +77,6 @@ public class UltraSonicSensors {
 
     /**
      * Gets the last read distance in cm of the leftInput sensor
-     *
      * @return the leftInput distance in cm
      */
     public synchronized int getLeftDistance() {
@@ -87,7 +85,6 @@ public class UltraSonicSensors {
 
     /**
      * Gets the last read distance in cm of the frontInput sensor
-     *
      * @return the frontInput distance in cm
      */
     public synchronized int getFrontDistance() {
@@ -96,7 +93,6 @@ public class UltraSonicSensors {
 
     /**
      * Gets the last read distance in cm of the rightInput sensor
-     *
      * @return the rightInput distance in cm
      */
     public synchronized int getRightDistance() {
