@@ -38,16 +38,14 @@ public class Lada extends IRobotCreateAdapter {
 		// song(0, new int[]{58, 10});
 	}
 
-	public void initialize() throws ConnectionLostException {
+	public void initialize() throws ConnectionLostException, InterruptedException {
 		startingText();
-		driveDirect(400, 400);
+		goForward(200);
+		turn(90);
 		goForward(100);
-		// turn(90);
-		// goForward(6);
-		// turn(-90);
-		// goForward(3);
-		// stop();
-		
+		turn(-90);
+		goForward(100);
+		stop();		
 	}
 
 
@@ -101,32 +99,33 @@ public class Lada extends IRobotCreateAdapter {
 	public void goForward(int centimeters) throws ConnectionLostException {
 		int totalDistance = 0;
 		readSensors(SENSORS_GROUP_ID6);
-		
-		while (totalDistance/10 < centimeters) {
+		driveDirect(250, 250);
+		while (totalDistance < centimeters*10) {
 			readSensors(SENSORS_GROUP_ID6);
 			int dd = getDistance();
 			totalDistance += dd;
+			dashboard.log("" + totalDistance/10 + " cm");
 		}
 		stop();
-		dashboard.log("" + totalDistance);
 	}
 
 	public void turn(int degrees) throws ConnectionLostException {
 		if (degrees > 0) {
 			driveDirect(0, 250);
+			SystemClock.sleep(17 * degrees);
 		}
-		if (degrees < 0) {
+		else {
 			driveDirect(250, 0);
+			SystemClock.sleep(-17 * degrees);
 		}
-		SystemClock.sleep(16 * degrees);
 	}
 
 	public void startingText() {
 
-		this.dashboard.log(" Welcome to AwesomeAPI. Starting robot in five seconds.");
+		this.dashboard.speak(" Welcome to Awesome A.P.I. Starting robot in five seconds.");
 		for (int i = 5; i > 0; i--) {
 			SystemClock.sleep(1000);
-			this.dashboard.log(" " + i + "...");
+			this.dashboard.speak(" " + i + "...");
 		}
 
 		SystemClock.sleep(500);
@@ -143,6 +142,7 @@ public class Lada extends IRobotCreateAdapter {
 				.log(" There are "
 						+ distance
 						+ " centimeters from the left ultrasonic sensor to the object in front of it.");
+		SystemClock.sleep(2000);
 		}
 	}
 
