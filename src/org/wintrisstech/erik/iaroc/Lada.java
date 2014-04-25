@@ -39,13 +39,15 @@ public class Lada extends IRobotCreateAdapter {
 	}
 
 	public void initialize() throws ConnectionLostException, InterruptedException {
-		startingText();
-		goForward(200);
-		turn(90);
-		goForward(100);
-		turn(-90);
-		goForward(100);
-		stop();		
+		//startingText();
+//		
+//		for (int i = 0; i < 4; i++) {
+//			goForward(100);
+//			turn(90);
+//		}
+//		
+//		stop();
+		
 	}
 
 
@@ -56,7 +58,8 @@ public class Lada extends IRobotCreateAdapter {
 	 * @throws InterruptedException
 	 */
 	public void loop() throws ConnectionLostException, InterruptedException {
-		readLeftDistance();
+		//readLeftDistance();
+		readFrontDistance();
 	}
 
 	public void accelerate(int maxSpeed) throws ConnectionLostException {
@@ -110,13 +113,14 @@ public class Lada extends IRobotCreateAdapter {
 	}
 
 	public void turn(int degrees) throws ConnectionLostException {
-		if (degrees > 0) {
-			driveDirect(0, 250);
-			SystemClock.sleep(17 * degrees);
+		int turnTime = 15;
+		if (degrees > 0) { //positive (+) turns right
+			driveDirect(-150, 150);
+			SystemClock.sleep(turnTime * degrees);
 		}
-		else {
-			driveDirect(250, 0);
-			SystemClock.sleep(-17 * degrees);
+		else { //negative (-) turns left
+			driveDirect(150, -150);
+			SystemClock.sleep(-turnTime * degrees);
 		}
 	}
 
@@ -137,13 +141,26 @@ public class Lada extends IRobotCreateAdapter {
 		sonar.read();
 		float distance = sonar.getLeftDistance();
 		if(distance > 1)  {
-			dashboard.speak(""+ (int)distance);
+			//dashboard.speak(""+ (int)distance);
 		this.dashboard
 				.log(" There are "
 						+ distance
 						+ " centimeters from the left ultrasonic sensor to the object in front of it.");
 		SystemClock.sleep(2000);
 		}
+		}
+		public void readFrontDistance() throws ConnectionLostException,
+		InterruptedException {
+	sonar.read();
+	float distance = sonar.getFrontDistance();
+	if(distance > 1)  {
+		//dashboard.speak(""+ (int)distance);
+	this.dashboard
+			.log( distance
+					+ " centimeters (front sonar)");
+	SystemClock.sleep(2000);
+	}
+		
 	}
 
 }
