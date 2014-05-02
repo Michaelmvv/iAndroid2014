@@ -39,17 +39,14 @@ public class Lada extends IRobotCreateAdapter {
 	}
 
 	public void initialize() throws ConnectionLostException, InterruptedException {
-		//startingText();
-//		
-//		for (int i = 0; i < 4; i++) {
-//			goForward(100);
-//			turn(90);
-//		}
-//		
-//		stop();
+		startingText();
 		
+		for (int i = 0; i < 4; i++) {
+			goForward(50);
+			turn(90);
+			stop();
+		}
 	}
-
 
 	/**
 	 * This method is called repeatedly
@@ -126,7 +123,7 @@ public class Lada extends IRobotCreateAdapter {
 
 	public void startingText() {
 
-		this.dashboard.speak(" Welcome to Awesome A.P.I. Starting robot in five seconds.");
+		this.dashboard.speak(" Welcome to team win equals true's A.P.I. Starting robot in five seconds.");
 		for (int i = 5; i > 0; i--) {
 			SystemClock.sleep(1000);
 			this.dashboard.speak(" " + i + "...");
