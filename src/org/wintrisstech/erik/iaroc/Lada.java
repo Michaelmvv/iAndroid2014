@@ -17,7 +17,7 @@ import android.os.SystemClock;
 public class Lada extends IRobotCreateAdapter {
 	private final Dashboard dashboard;
 	public UltraSonicSensors sonar;
-
+	public int TURNSPEED = 80;
 	/**
 	 * Constructs a Lada, an amazing machine!
 	 * 
@@ -32,6 +32,7 @@ public class Lada extends IRobotCreateAdapter {
 	 */
 	public Lada(IOIO ioio, IRobotCreateInterface create, Dashboard dashboard)
 			throws ConnectionLostException {
+		
 		super(create);
 		sonar = new UltraSonicSensors(ioio);
 		this.dashboard = dashboard;
@@ -39,7 +40,8 @@ public class Lada extends IRobotCreateAdapter {
 	}
 
 	public void initialize() throws ConnectionLostException {
-		dashboard.log("iAndroid2014 happy version 140427A");
+		startingText();
+		drawSquare(50, 2);
 	}
 
 	/**
@@ -47,6 +49,13 @@ public class Lada extends IRobotCreateAdapter {
 	 * 
 	 * @throws ConnectionLostException
 	 */
+	public void drawSquare(int lineLength, int amountOfSquares) throws ConnectionLostException {
+		for (int x = 0; x < 4*amountOfSquares; x++) {
+			goForward(lineLength);
+			turn(90);
+		}
+	}
+	
 	public void loop() throws ConnectionLostException {
 		try {
 			sonar.read();
@@ -67,7 +76,119 @@ public class Lada extends IRobotCreateAdapter {
 			driveDirect(-500, -500);
 			SystemClock.sleep(1000);
 		}
-		
+
 		driveDirect(0, 0);
+	}
+
+	public void accelerate(int maxSpeed) throws ConnectionLostException {
+		for (int i = 0; i < maxSpeed; i++) {
+			driveDirect(i, i);
+		}
+	}
+
+	public void turnRight() throws ConnectionLostException {
+		driveDirect(-500, 500);
+		SystemClock.sleep(300);
+	}
+
+	public void deccelerate() throws ConnectionLostException {
+
+		for (int x = 500; x > 0; x--) {
+
+			driveDirect(x, x);
+		}
+	}
+
+	public void turnAround() throws ConnectionLostException {
+		driveDirect(-500, 500);
+		SystemClock.sleep(1850);
+	}
+
+	public void goFast(int speed) throws ConnectionLostException {
+		driveDirect(speed, speed);
+	}
+
+	public void stop() throws ConnectionLostException {
+		driveDirect(0, 0);
+	}
+
+	public void turnLeft() throws ConnectionLostException {
+		driveDirect(500, -500);
+		SystemClock.sleep(300);
+	}
+
+	public void goForward(int centimeters) throws ConnectionLostException {
+		int totalDistance = 0;
+		readSensors(SENSORS_GROUP_ID6);
+		driveDirect(250, 250);
+		while (totalDistance < centimeters * 10) {
+			readSensors(SENSORS_GROUP_ID6);
+			int dd = getDistance();
+			totalDistance += dd;
+			dashboard.log("" + totalDistance / 10 + " cm");
+		}
+		stop();
+	}
+
+	public void turn(int degrees) throws ConnectionLostException {
+		//int turnTime = 15;
+		int turningProgress = 0;
+		while(Math.abs(turningProgress) < Math.abs(degrees)){
+			readSensors(SENSORS_GROUP_ID6);
+			dashboard.log("TP " +  turningProgress);
+			turningProgress += getAngle();
+			if(degrees > 0){
+			driveDirect(-TURNSPEED, TURNSPEED);
+			}else if(degrees < 0){
+			driveDirect(TURNSPEED, -TURNSPEED);
+			}
+		}
+		stop();
+//		if (degrees > 0) { // positive (+) turns right
+//			driveDirect(-150, 150);
+//			SystemClock.sleep(turnTime * degrees);
+//		} else { // negative (-) turns left
+//			driveDirect(150, -150);
+//			SystemClock.sleep(-turnTime * degrees);
+//		}
+	}
+
+	public void startingText() {
+
+		this.dashboard
+				.speak(" Welcome to team win equals true's A.P.I. Starting robot in five seconds.");
+		for (int i = 5; i > 0; i--) {
+			SystemClock.sleep(1000);
+			this.dashboard.speak(" " + i + "...");
+		}
+
+		SystemClock.sleep(500);
+		this.dashboard.log(" Now starting robot.");
+	}
+
+	public void readLeftDistance() throws ConnectionLostException,
+			InterruptedException {
+		sonar.read();
+		float distance = sonar.getLeftDistance();
+		if (distance > 1) {
+			// dashboard.speak(""+ (int)distance);
+			this.dashboard
+					.log(" There are "
+							+ distance
+							+ " centimeters from the left ultrasonic sensor to the object in front of it.");
+			SystemClock.sleep(2000);
+		}
+	}
+
+	public void readFrontDistance() throws ConnectionLostException,
+			InterruptedException {
+		sonar.read();
+		float distance = sonar.getFrontDistance();
+		if (distance > 1) {
+			// dashboard.speak(""+ (int)distance);
+			this.dashboard.log(distance + " centimeters (front sonar)");
+			SystemClock.sleep(2000);
+		}
+
 	}
 }
