@@ -17,7 +17,9 @@ import android.os.SystemClock;
 public class Lada extends IRobotCreateAdapter {
 	private final Dashboard dashboard;
 	public UltraSonicSensors sonar;
-	public int TURNSPEED = 80;
+	public int TURNSPEED = 120;
+	public int TURNSPEEDSLOW = 60;
+
 	/**
 	 * Constructs a Lada, an amazing machine!
 	 * 
@@ -32,7 +34,7 @@ public class Lada extends IRobotCreateAdapter {
 	 */
 	public Lada(IOIO ioio, IRobotCreateInterface create, Dashboard dashboard)
 			throws ConnectionLostException {
-		
+
 		super(create);
 		sonar = new UltraSonicSensors(ioio);
 		this.dashboard = dashboard;
@@ -40,8 +42,9 @@ public class Lada extends IRobotCreateAdapter {
 	}
 
 	public void initialize() throws ConnectionLostException {
-		startingText();
-		drawSquare(50, 2);
+		//startingText();
+		//drawSquare(50, 1);
+		turn(90);
 	}
 
 	/**
@@ -49,35 +52,37 @@ public class Lada extends IRobotCreateAdapter {
 	 * 
 	 * @throws ConnectionLostException
 	 */
-	public void drawSquare(int lineLength, int amountOfSquares) throws ConnectionLostException {
-		for (int x = 0; x < 4*amountOfSquares; x++) {
+	public void drawSquare(int lineLength, int amountOfSquares)
+			throws ConnectionLostException {
+		for (int x = 0; x < 4 * amountOfSquares; x++) {
 			goForward(lineLength);
+			drawSquare(30, 2);
 			turn(90);
 		}
 	}
-	
-	public void loop() throws ConnectionLostException {
-		try {
-			sonar.read();
-		} catch (InterruptedException ex) {
-		}
-		dashboard.log("L: " + sonar.getLeftDistance() + " F: "
-				+ sonar.getFrontDistance() + " R: " + sonar.getRightDistance());
-		SystemClock.sleep(100);
-		if (sonar.getLeftDistance() < 20) {
-			driveDirect(0, 100);
-			SystemClock.sleep(1000);
-		}
-		if (sonar.getRightDistance() < 20) {
-			driveDirect(100, 0);
-			SystemClock.sleep(1000);
-		}
-		if (sonar.getFrontDistance() < 20) {
-			driveDirect(-500, -500);
-			SystemClock.sleep(1000);
-		}
 
-		driveDirect(0, 0);
+	public void loop() throws ConnectionLostException {
+//		try {
+//			sonar.read();
+//		} catch (InterruptedException ex) {
+//		}
+//		dashboard.log("L: " + sonar.getLeftDistance() + " F: "
+//				+ sonar.getFrontDistance() + " R: " + sonar.getRightDistance());
+//		SystemClock.sleep(100);
+//		if (sonar.getLeftDistance() < 20) {
+//			driveDirect(0, 100);
+//			SystemClock.sleep(1000);
+//		}
+//		if (sonar.getRightDistance() < 20) {
+//			driveDirect(100, 0);
+//			SystemClock.sleep(1000);
+//		}
+		//if (sonar.getFrontDistance() < 20) {
+		//	driveDirect(-500, -500);
+		//	SystemClock.sleep(1000);
+		//}
+		//dashboard.log("A:" + (int) dashboard.getAzimuth());
+		//driveDirect(0, 0);
 	}
 
 	public void accelerate(int maxSpeed) throws ConnectionLostException {
@@ -129,41 +134,45 @@ public class Lada extends IRobotCreateAdapter {
 		}
 		stop();
 	}
-
-	public void turn(int degrees) throws ConnectionLostException {
-		//int turnTime = 15;
-		int turningProgress = 0;
-		while(Math.abs(turningProgress) < Math.abs(degrees)){
-			readSensors(SENSORS_GROUP_ID6);
-			dashboard.log("TP " +  turningProgress);
-			turningProgress += getAngle();
-			if(degrees > 0){
-			driveDirect(-TURNSPEED, TURNSPEED);
-			}else if(degrees < 0){
-			driveDirect(TURNSPEED, -TURNSPEED);
-			}
-		}
+	public void tempStop(int tempStopTime) throws ConnectionLostException {
 		stop();
-//		if (degrees > 0) { // positive (+) turns right
-//			driveDirect(-150, 150);
-//			SystemClock.sleep(turnTime * degrees);
-//		} else { // negative (-) turns left
-//			driveDirect(150, -150);
-//			SystemClock.sleep(-turnTime * degrees);
-//		}
+		SystemClock.sleep(tempStopTime);
+	}
+	
+	public void turn(int degrees) throws ConnectionLostException { //dumbness activate!!!
+		// int turnTime = 15;
+	//	int turningProgress = 0;
+		int initialTurningTarget = (int) (dashboard.getAzimuth() + 180 + degrees);
+		//readSensors(SENSORS_GROUP_ID6);
+		//int turnBreakingPoint =  (int) ((Math.abs(degrees)) * 0.8);
+
+		if (degrees > 0) {
+			driveDirect(-TURNSPEED, TURNSPEED);
+		} else if (degrees < 0) {
+			driveDirect(TURNSPEED , -TURNSPEED);
+	}
+		
+		while(dashboard.getAzimuth() + 180 < initialTurningTarget){
+			//readSensors(SENSORS_GROUP_ID6);
+		    dashboard.log(  "azimuth : " + (int) dashboard.getAzimuth() );
+			//SystemClock.sleep(30);
+			
+		}
+
+		stop();
+		// if (degrees > 0) { // positive (+) turns right
+		// driveDirect(-150, 150);
+		// SystemClock.sleep(turnTime * degrees);
+		// } else { // negative (-) turns left
+		// driveDirect(150, -150);
+		// SystemClock.sleep(-turnTime * degrees);
+		// }
 	}
 
 	public void startingText() {
 
-		this.dashboard
-				.speak(" Welcome to team win equals true's A.P.I. Starting robot in five seconds.");
-		for (int i = 5; i > 0; i--) {
-			SystemClock.sleep(1000);
-			this.dashboard.speak(" " + i + "...");
-		}
-
-		SystemClock.sleep(500);
-		this.dashboard.log(" Now starting robot.");
+		this.dashboard.speak(" Welcome to team win equals true's A.P.I.. Now starting robot.");
+		SystemClock.sleep(5500);
 	}
 
 	public void readLeftDistance() throws ConnectionLostException,
