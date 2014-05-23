@@ -25,8 +25,7 @@ public class Lada extends IRobotCreateAdapter
 
 	public void initialize() throws ConnectionLostException
 	{
-//		driveDirect(100, 200);
-//		turn(90);
+		goToHeading(90);
 	}
 
 	public void drawSquare(int lineLength, int amountOfSquares)
@@ -38,6 +37,26 @@ public class Lada extends IRobotCreateAdapter
 			drawSquare(30, 2);
 			turn(90);
 		}
+	}
+
+	public void goToHeading(int heading) throws ConnectionLostException
+	{
+		int currentHeading = (int) dashboard.getAzimuth() %360;
+//TODO Get the compass heading working
+		while (heading != currentHeading)
+		{
+			currentHeading = (int) dashboard.getAzimuth()  %360;
+			dashboard.log("CurrentHeading: " + currentHeading);
+			
+
+			currentHeading = (int) dashboard.getAzimuth();
+		}
+		stop();
+	}
+
+	public void stop() throws ConnectionLostException
+	{
+		driveDirect(0, 0);
 	}
 
 	public void loop() throws ConnectionLostException
@@ -79,11 +98,6 @@ public class Lada extends IRobotCreateAdapter
 	public void goFast(int speed) throws ConnectionLostException
 	{
 		driveDirect(speed, speed);
-	}
-
-	public void stop() throws ConnectionLostException
-	{
-		driveDirect(0, 0);
 	}
 
 	public void turnLeft() throws ConnectionLostException
