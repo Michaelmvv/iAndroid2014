@@ -58,7 +58,6 @@ public class Lada extends IRobotCreateAdapter
 			currentHeading = (int) dashboard.getAzimuth()  %360;
 			dashboard.log("CurrentHeading: " + currentHeading);
 			
-
 			currentHeading = (int) dashboard.getAzimuth();
 		}
 		stop();
