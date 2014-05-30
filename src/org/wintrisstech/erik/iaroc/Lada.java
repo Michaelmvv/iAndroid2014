@@ -5,7 +5,9 @@ package org.wintrisstech.erik.iaroc;
  **************************************************************************/
 import ioio.lib.api.IOIO;
 import ioio.lib.api.exception.ConnectionLostException;
+
 import org.wintrisstech.sensors.UltraSonicSensors;
+
 import android.os.SystemClock;
 
 public class Lada extends IRobotCreateAdapter
@@ -14,6 +16,7 @@ public class Lada extends IRobotCreateAdapter
 	public UltraSonicSensors sonar;
 	public int TURNSPEED = 120;
 	public int TURNSPEEDSLOW = 60;
+	private Robot myRobot; 
 
 	public Lada(IOIO ioio, IRobotCreateInterface create, Dashboard dashboard)
 			throws ConnectionLostException
@@ -25,7 +28,11 @@ public class Lada extends IRobotCreateAdapter
 
 	public void initialize() throws ConnectionLostException
 	{
-		goToHeading(90);
+		myRobot = new Robot(dashboard, this);
+		myRobot.log("iAndroid2014 version 0.0.1");
+		myRobot.log("Ready!");
+		myRobot.goForward(10);
+		myRobot.log("I'm done.");
 	}
 
 	public void drawSquare(int lineLength, int amountOfSquares)
