@@ -33,6 +33,7 @@ public class Lada extends IRobotCreateAdapter
 		myRobot.log("Ready!");
 		myRobot.goForward(10);
 		myRobot.log("I'm done.");
+		myRobot.goForwardRandom();
 	}
 
 	public void drawSquare(int lineLength, int amountOfSquares)
@@ -46,9 +47,11 @@ public class Lada extends IRobotCreateAdapter
 		}
 	}
 
+
+	
 	public void goToHeading(int heading) throws ConnectionLostException
 	{
-		int currentHeading = (int) dashboard.getAzimuth() %360;
+		int currentHeading = (int)	 dashboard.getAzimuth() %360;
 //TODO Get the compass heading working
 		while (heading != currentHeading)
 		{
