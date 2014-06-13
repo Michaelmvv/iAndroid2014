@@ -1,11 +1,16 @@
 package org.wintrisstech.erik.iaroc;
-
+/**************************************************************************
+ * Simplified version 140512A by Erik  Super Happy Version
+ **************************************************************************/
 import ioio.lib.api.IOIO;
 import ioio.lib.api.exception.ConnectionLostException;
 import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.android.IOIOActivity;
 
 import java.util.Locale;
+
+import org.wintrisstech.irobot.ioio.IRobotCreateInterface;
+import org.wintrisstech.irobot.ioio.SimpleIRobotCreate;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;

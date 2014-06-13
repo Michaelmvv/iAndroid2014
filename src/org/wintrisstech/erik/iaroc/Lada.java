@@ -1,183 +1,124 @@
 package org.wintrisstech.erik.iaroc;
 
 /**************************************************************************
- * Happy version...ultrasonics working...Version 140427A...mods by Vic
+ * Super Happy version...ultrasonics working...Version 140512A...mods by Vic
+ * Added compass class...works..updatged to adt bundle 20140321
  **************************************************************************/
 import ioio.lib.api.IOIO;
 import ioio.lib.api.exception.ConnectionLostException;
 
+import org.wintrisstech.irobot.ioio.IRobotCreateAdapter;
+import org.wintrisstech.irobot.ioio.IRobotCreateInterface;
 import org.wintrisstech.sensors.UltraSonicSensors;
 
 import android.os.SystemClock;
 
-public class Lada extends IRobotCreateAdapter
-{
+import java.util.TimerTask;
+
+/**
+ * A Lada is an implementation of the IRobotCreateInterface, inspired by Vic's
+ * awesome API. It is entirely event driven.
+ * @author Erik
+ * Simplified version 140512A by Erik  Super Happy Version
+ */
+public class Lada extends IRobotCreateAdapter {
 	private final Dashboard dashboard;
 	public UltraSonicSensors sonar;
-	public int TURNSPEED = 120;
-	public int TURNSPEEDSLOW = 60;
+	private boolean firstPass = true;;
+	private int commandAzimuth;
 	private Robot myRobot; 
 
+	/**
+	 * Constructs a Lada, an amazing machine!
+	 * 
+	 * @param ioio
+	 *            the IOIO instance that the Lada can use to communicate with
+	 *            other peripherals such as sensors
+	 * @param create
+	 *            an implementation of an iRobot
+	 * @param dashboard
+	 *            the Dashboard instance that is connected to the Lada
+	 * @throws ConnectionLostException
+	 */
 	public Lada(IOIO ioio, IRobotCreateInterface create, Dashboard dashboard)
-			throws ConnectionLostException
-	{
+			throws ConnectionLostException {
 		super(create);
 		sonar = new UltraSonicSensors(ioio);
 		this.dashboard = dashboard;
 	}
 
-	public void initialize() throws ConnectionLostException
-	{
-		myRobot = new Robot(dashboard, this);
+	public void initialize() throws ConnectionLostException {
+	
+		myRobot = new Robot(dashboard, this, sonar);
 		myRobot.log("iAndroid2014 version 0.0.1");
 		myRobot.log("Ready!");
-		myRobot.goForward(10);
-		myRobot.log("I'm done.");
-	}
-
-	public void drawSquare(int lineLength, int amountOfSquares)
-			throws ConnectionLostException
-	{
-		for (int x = 0; x < 4 * amountOfSquares; x++)
+		//myRobot.speak("Hi.Cameron!");
+		//myRobot.goForward(10);
+		//myRobot.rotateRight();
+		
+		if (false)
 		{
-			goForward(lineLength);
-			drawSquare(30, 2);
-			turn(90);
-		}
-	}
-
-	public void goToHeading(int heading) throws ConnectionLostException
-	{
-		int currentHeading = (int) dashboard.getAzimuth() %360;
-//TODO Get the compass heading working
-		while (heading != currentHeading)
-		{
-			currentHeading = (int) dashboard.getAzimuth()  %360;
-			dashboard.log("CurrentHeading: " + currentHeading);
 			
+		
+		java.util.Timer t = new java.util.Timer();
+		t.schedule(new TimerTask() {
 
-			currentHeading = (int) dashboard.getAzimuth();
+		            @Override
+		            public void run() {
+		                //myRobot.log("This will run every 5 seconds");
+		            	myRobot.maintainHeadingLogic();
+
+		            }
+		        }, 1000, 1000);
 		}
-		stop();
+		myRobot.rightSpeed = 100;
+		myRobot.leftSpeed = 100;
+		myRobot.log("exiting initialize()...");
 	}
 
-	public void stop() throws ConnectionLostException
-	{
-		driveDirect(0, 0);
+	/**
+	 * This method is called repeatedly
+	 * 
+	 * @throws ConnectionLostException
+	 * @throws InterruptedException 
+	 */
+	public void loop() throws ConnectionLostException, InterruptedException {
+		
+		myRobot.followStraightWall(100, 15, 1, 10, "right", 200);
+		//dashboard.log(String.valueOf(readCompass()));
+		//myRobot.turnToHeading(5);
+//		
+//		myRobot.maintainHeading();
+//		SystemClock.sleep(100);
+//		myRobot.log("Front Distance: " + myRobot.getFrontDistance());
+//		SystemClock.sleep(100);
+//		
+//		myRobot.log("Right Distance: " + myRobot.getRightDistance());
+//		SystemClock.sleep(100);
+//		myRobot.log("Left Distance: " + myRobot.getLeftDistance());
+		
+		
 	}
 
-	public void loop() throws ConnectionLostException
+	public void turn(int commandAngle) throws ConnectionLostException //Doesn't work for turns through 360
 	{
-		dashboard.log(String.valueOf((int) (dashboard.getAzimuth())));
-		SystemClock.sleep(500);
-	}
-
-	public void accelerate(int maxSpeed) throws ConnectionLostException
-	{
-		for (int i = 0; i < maxSpeed; i++)
-		{
-			driveDirect(i, i);
+		int startAzimuth = 0;
+		if (firstPass) {
+			startAzimuth += readCompass();
+			commandAzimuth = (startAzimuth + commandAngle) % 360;
+			dashboard.log("commandaz = " + commandAzimuth + " startaz = " + startAzimuth);
+			firstPass = false;
 		}
-	}
-
-	public void turnRight() throws ConnectionLostException
-	{
-		driveDirect(-500, 500);
-		SystemClock.sleep(300);
-	}
-
-	public void deccelerate() throws ConnectionLostException
-	{
-
-		for (int x = 500; x > 0; x--)
-		{
-
-			driveDirect(x, x);
-		}
-	}
-
-	public void turnAround() throws ConnectionLostException
-	{
-		driveDirect(-500, 500);
-		SystemClock.sleep(1850);
-	}
-
-	public void goFast(int speed) throws ConnectionLostException
-	{
-		driveDirect(speed, speed);
-	}
-
-	public void turnLeft() throws ConnectionLostException
-	{
-		driveDirect(500, -500);
-		SystemClock.sleep(300);
-	}
-
-	public void goForward(int centimeters) throws ConnectionLostException
-	{
-		int totalDistance = 0;
-		readSensors(SENSORS_GROUP_ID6);
-		driveDirect(250, 250);
-		while (totalDistance < centimeters * 10)
-		{
-			readSensors(SENSORS_GROUP_ID6);
-			int dd = getDistance();
-			totalDistance += dd;
-			dashboard.log("" + totalDistance / 10 + " cm");
-		}
-		stop();
-	}
-
-	public void tempStop(int tempStopTime) throws ConnectionLostException
-	{
-		stop();
-		SystemClock.sleep(tempStopTime);
-	}
-
-	public void turn(int degrees) throws ConnectionLostException
-	{
-		int initialTurningTarget = (int) (dashboard.getAzimuth() + 180);
-		dashboard.log(initialTurningTarget + "start");
-
-		while ((dashboard.getAzimuth() + 180) < (initialTurningTarget + degrees))
-		{
-		}
-
-		stop();
-		dashboard.log((int) (dashboard.getAzimuth() + 180) + "stop");
-	}
-
-	public void startingText()
-	{
-		this.dashboard
-				.speak(" Welcome to team win equals true's A.P.I.. Now starting robot.");
-		SystemClock.sleep(5500);
-	}
-
-	public void readLeftDistance() throws ConnectionLostException,
-			InterruptedException
-	{
-		sonar.read();
-		float distance = sonar.getLeftDistance();
-		if (distance > 1)
-		{
-			this.dashboard
-					.log(" There are "
-							+ distance
-							+ " centimeters from the left ultrasonic sensor to the object in front of it.");
-			SystemClock.sleep(2000);
+		int currentAzimuth = readCompass();
+		dashboard.log("now = " + currentAzimuth);
+		if (currentAzimuth >= commandAzimuth) {
+			driveDirect(0, 0);
+			firstPass = true;
+			dashboard.log("finalaz = " + readCompass());
 		}
 	}
 
-	public void readFrontDistance() throws ConnectionLostException,
-			InterruptedException
-	{
-		sonar.read();
-		float distance = sonar.getFrontDistance();
-		if (distance > 1)
-		{
-			this.dashboard.log(distance + " centimeters (front sonar)");
-			SystemClock.sleep(2000);
-		}
+	public int readCompass() {
+		return (int) (dashboard.getAzimuth() + 360) % 360;
 	}
 }

@@ -1,7 +1,7 @@
 package org.wintrisstech.sensors;
 
 /**************************************************************************
- * Happy version...ultrasonics working
+ * Simplified version 140512A by Erik  Super Happy Version
  **************************************************************************/
 import ioio.lib.api.DigitalOutput;
 import ioio.lib.api.IOIO;
@@ -19,19 +19,16 @@ import android.os.SystemClock;
  */
 public class UltraSonicSensors
 {
-	private static final float CONVERSION_FACTOR = 17280.0F; // cm / s
+	private static final float CONVERSION_FACTOR = 17280.0F; // cm/s
 	private static int LEFT_ULTRASONIC_INPUT_PIN = 35;
 	private static int FRONT_ULTRASONIC_INPUT_PIN = 36;
 	private static int RIGHT_ULTRASONIC_INPUT_PIN = 37;
 	private static final int LEFT_STROBE_ULTRASONIC_OUTPUT_PIN = 15;
 	private static final int FRONT_STROBE_ULTRASONIC_OUTPUT_PIN = 16;
 	private static final int RIGHT_STROBE_ULTRASONIC_OUTPUT_PIN = 17;
-	private PulseInput leftInput;
-	private PulseInput frontInput;
-	private PulseInput rightInput;
 	private DigitalOutput leftStrobe;
 	private DigitalOutput frontStrobe;
-	private DigitalOutput righttStrobe;
+	private DigitalOutput rightStrobe;
 	private volatile int leftDistance;
 	private volatile int frontDistance;
 	private volatile int rightDistance;
@@ -45,9 +42,9 @@ public class UltraSonicSensors
 	public UltraSonicSensors(IOIO ioio) throws ConnectionLostException
 	{
 		this.ioio = ioio;
-		this.leftStrobe = ioio.openDigitalOutput(LEFT_STROBE_ULTRASONIC_OUTPUT_PIN);// *******
-		this.righttStrobe = ioio.openDigitalOutput(RIGHT_STROBE_ULTRASONIC_OUTPUT_PIN);// *******
-		this.frontStrobe = ioio.openDigitalOutput(FRONT_STROBE_ULTRASONIC_OUTPUT_PIN);// *******
+		this.leftStrobe = ioio.openDigitalOutput(LEFT_STROBE_ULTRASONIC_OUTPUT_PIN);
+		this.rightStrobe = ioio.openDigitalOutput(RIGHT_STROBE_ULTRASONIC_OUTPUT_PIN);
+		this.frontStrobe = ioio.openDigitalOutput(FRONT_STROBE_ULTRASONIC_OUTPUT_PIN);
 	}
 
 	/**
@@ -59,45 +56,43 @@ public class UltraSonicSensors
 	 */
 	public void read() throws ConnectionLostException, InterruptedException
 	{
-		leftDistance = read(leftStrobe, leftInput, LEFT_ULTRASONIC_INPUT_PIN);
-		frontDistance = read(frontStrobe, frontInput, FRONT_ULTRASONIC_INPUT_PIN);
-		rightDistance = read(righttStrobe, rightInput, RIGHT_ULTRASONIC_INPUT_PIN);
+		leftDistance = read(leftStrobe, LEFT_ULTRASONIC_INPUT_PIN);
+		frontDistance = read(frontStrobe, FRONT_ULTRASONIC_INPUT_PIN);
+		rightDistance = read(rightStrobe, RIGHT_ULTRASONIC_INPUT_PIN);
 	}
 
-	private int read(DigitalOutput strobe, PulseInput input, int inputPin) throws ConnectionLostException, InterruptedException
+	private int read(DigitalOutput strobe, int inputPin) throws ConnectionLostException, InterruptedException
 	{
-		int distance = 0;
-		ioio.beginBatch();
+		ioio.beginBatch();//order of statements critical...do not change
 		strobe.write(true);
-		input = ioio.openPulseInput(inputPin, PulseMode.POSITIVE);
+		PulseInput input = ioio.openPulseInput(inputPin, PulseMode.POSITIVE);
 		ioio.endBatch();
 		SystemClock.sleep(20);
 		strobe.write(false);
-		distance += (int) (input.getDuration() * CONVERSION_FACTOR);
+		int distance = (int) (input.getDuration() * CONVERSION_FACTOR);
 		input.close();
 		return distance;
 	}
 
-	public synchronized int getLeftDistance()
+	public int getLeftDistance()
 	{
 		return leftDistance;
 	}
 
-	public synchronized int getFrontDistance()
+	public int getFrontDistance()
 	{
 		return frontDistance;
 	}
 
-	public synchronized int getRightDistance()
+	public int getRightDistance()
 	{
 		return rightDistance;
 	}
 
 	public void closeConnection()
 	{
-		leftInput.close();
-		frontInput.close();
-		rightInput.close();
 		leftStrobe.close();
+		frontStrobe.close();
+		rightStrobe.close();
 	}
 }
