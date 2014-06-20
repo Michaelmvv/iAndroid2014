@@ -109,6 +109,7 @@ public class Robot {
 	public void followStraightWall(int speed, int turnSpeed, int bufferDis, int distance, String side, int sleepTime) throws ConnectionLostException, InterruptedException{
 		if(side.equalsIgnoreCase("right")){
 			//TODO Fix the Turning
+			//Logic is correct, all else needs help.....
 			int right = this.getRightDistance();
 			int delta = right - distance;
 			dashboard.log("" + delta);
