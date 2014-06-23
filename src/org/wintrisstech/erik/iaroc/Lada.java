@@ -70,15 +70,15 @@ public class Lada extends IRobotCreateAdapter
 
 	public void loop() throws ConnectionLostException
 	{
-//		dashboard.log(String.valueOf((int) (dashboard.getAzimuth())));
-//		SystemClock.sleep(500);
+		dashboard.log(String.valueOf((int) (dashboard.getAzimuth())));
+		SystemClock.sleep(500);
 		checkBumpSensors();
 		try {
-			myRobot.followStraightWall(400, 20, 2, 10, "Right", 200);
+			myRobot.followStraightWall(/*speed (450 max)*/ 300,/*turn speed*/ 10, /*buffer distance*/ 5, /*distance*/ 30, /*wall*/ "Right", /*sleep time*/ 50);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			dashboard.log("Stuff did not work");
+			dashboard.log("Stuff did not work!");
 		}
 	}
 
