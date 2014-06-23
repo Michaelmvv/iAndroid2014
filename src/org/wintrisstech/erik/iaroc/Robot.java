@@ -143,6 +143,31 @@ public class Robot {
 		SystemClock.sleep(sleepTime);
 
 	}
+	
+	public void doLeftWallHugging()
+	{
+		return;
+	}
+	
+	public void turnLeft() throws ConnectionLostException
+	{
+		this.driveDirect(-300, 300);
+		SystemClock.sleep(700);
+		stop();
+	}
+	
+	public void turnRight() throws ConnectionLostException
+	{
+		driveDirect(300, -300);
+		SystemClock.sleep(700);
+		stop();
+	}
+	
+	public void turnAround() throws ConnectionLostException {
+		turnRight();
+		turnRight();
+	}
+	
 	public void michaelsFollowStraightWall(int speed, String side,int sleepTime) throws ConnectionLostException, InterruptedException {
 		if (side.equalsIgnoreCase("Right")) {
 		//	int right = this.getRightDistance();

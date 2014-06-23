@@ -31,10 +31,17 @@ public class Lada extends IRobotCreateAdapter
 		myRobot = new Robot(dashboard, this, sonar);
 		myRobot.log("iAndroid2014 version 0.0.1");
 		myRobot.log("Ready!");
-//		myRobot.goForward(10);
-//		myRobot.log("I'm done.");
-//		myRobot.goForwardRandom();
+		myRobot.turnAround();
 	}
+	
+	public void loop() throws ConnectionLostException, InterruptedException
+	{
+		//myRobot.followStraightWall(/*speed (450 max)*/ 300,/*turn speed*/ 10, /*buffer distance*/ 5, /*distance*/ 30, /*wall*/ "Right", /*sleep time*/ 50);	
+	
+		myRobot.doLeftWallHugging();
+	}
+	
+	
 
 	public void drawSquare(int lineLength, int amountOfSquares)
 			throws ConnectionLostException
@@ -68,19 +75,7 @@ public class Lada extends IRobotCreateAdapter
 		driveDirect(0, 0);
 	}
 
-	public void loop() throws ConnectionLostException
-	{
-		dashboard.log(String.valueOf((int) (dashboard.getAzimuth())));
-		SystemClock.sleep(500);
-		checkBumpSensors();
-		try {
-			myRobot.followStraightWall(/*speed (450 max)*/ 300,/*turn speed*/ 10, /*buffer distance*/ 5, /*distance*/ 30, /*wall*/ "Right", /*sleep time*/ 50);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			dashboard.log("Stuff did not work!");
-		}
-	}
+	
 
 	public void accelerate(int maxSpeed) throws ConnectionLostException
 	{
@@ -90,11 +85,7 @@ public class Lada extends IRobotCreateAdapter
 		}
 	}
 
-	public void turnRight() throws ConnectionLostException
-	{
-		driveDirect(-500, 500);
-		SystemClock.sleep(300);
-	}
+	
 
 	public void checkBumpSensors() throws ConnectionLostException {
 		readSensors(SENSORS_BUMPS_AND_WHEEL_DROPS);
@@ -125,11 +116,7 @@ public class Lada extends IRobotCreateAdapter
 		driveDirect(speed, speed);
 	}
 
-	public void turnLeft() throws ConnectionLostException
-	{
-		driveDirect(500, -500);
-		SystemClock.sleep(300);
-	}
+	
 
 	public void goForward(int centimeters) throws ConnectionLostException
 	{
