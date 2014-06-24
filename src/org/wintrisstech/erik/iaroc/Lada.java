@@ -31,14 +31,14 @@ public class Lada extends IRobotCreateAdapter
 		myRobot = new Robot(dashboard, this, sonar);
 		myRobot.log("iAndroid2014 version 0.0.1");
 		myRobot.log("Ready!");
-		myRobot.turnAround();
+		
+		
 	}
 	
 	public void loop() throws ConnectionLostException, InterruptedException
 	{
 		//myRobot.followStraightWall(/*speed (450 max)*/ 300,/*turn speed*/ 10, /*buffer distance*/ 5, /*distance*/ 30, /*wall*/ "Right", /*sleep time*/ 50);	
-	
-		myRobot.doLeftWallHugging();
+		myRobot.doRightWallHugging(30);
 	}
 	
 	
@@ -48,7 +48,7 @@ public class Lada extends IRobotCreateAdapter
 	{
 		for (int x = 0; x < 4 * amountOfSquares; x++)
 		{
-			goForward(lineLength);
+			myRobot.goForward(lineLength);
 			drawSquare(30, 2);
 			turn(90);
 		}

@@ -43,7 +43,7 @@ public class Robot {
 	public void goForward(int centimeters) throws ConnectionLostException {
 		int totalDistance = 0;
 		lada.readSensors(Lada.SENSORS_GROUP_ID6);
-		lada.driveDirect(250, 250);
+		lada.driveDirect(200, 200);
 		while (totalDistance < centimeters * 10) {
 			lada.readSensors(Lada.SENSORS_GROUP_ID6);
 			int dd = lada.getDistance();
@@ -144,22 +144,79 @@ public class Robot {
 
 	}
 	
-	public void doLeftWallHugging()
+	
+	
+	public void forwardOneSpace() throws ConnectionLostException, InterruptedException{
+		if(this.getFrontDistance() < 50){
+			this.dashboard.log("Going forward sensor dis : " + (this.getFrontDistance() - 10));
+			goForward(this.getFrontDistance() - 10);
+		}else{
+		this.dashboard.log("Going forward static dis");
+		this.goForward(61);
+		}
+	}
+	
+	public void doRightWallHugging(int wallDis) throws ConnectionLostException, InterruptedException
 	{
-		return;
+		
+		lada.readSensors(Lada.SENSORS_GROUP_ID6);
+		this.dashboard.log("Sensors Read");
+		if(this.lada.isBumpLeft() && this.lada.isBumpRight()){
+			this.driveDirect(-100, -100);
+			SystemClock.sleep(500);
+			stop();
+		}else if(this.lada.isBumpLeft()){
+			stop();
+			this.driveDirect(-200, -200);
+			SystemClock.sleep(500);
+			stop();
+			this.rotateRight();
+			SystemClock.sleep(500);
+			stop();
+		}else if(this.lada.isBumpRight()){
+			stop();
+			this.driveDirect(-200, -200);
+			SystemClock.sleep(500);
+			stop();
+			this.rotateLeft();
+			SystemClock.sleep(500);
+			stop();
+		}
+		if(this.getRightDistance() > wallDis) {
+			this.dashboard.log("turningRight...");
+			turnRight();
+			this.dashboard.log("Finished Turn!   MOVING...");
+			forwardOneSpace();
+			this.dashboard.log("Moved Forward");
+		} else if(this.getFrontDistance() > wallDis) {
+			this.dashboard.log("MOVING...");
+			forwardOneSpace();
+			this.dashboard.log("Moved Forward");
+		} else if(this.getLeftDistance() > wallDis) {
+			this.dashboard.log("turningLeft...");
+			turnLeft();
+			this.dashboard.log("Finished Turn!   MOVING...");
+			forwardOneSpace();
+			this.dashboard.log("Moved Forward");
+		} else {
+			this.dashboard.log("Turning Around...");
+			turnAround();
+			this.dashboard.log("Finished Turn!   MOVING...");
+			forwardOneSpace();
+		}
 	}
 	
 	public void turnLeft() throws ConnectionLostException
 	{
-		this.driveDirect(-300, 300);
-		SystemClock.sleep(700);
+		this.driveDirect(-150, 150);
+		SystemClock.sleep(1400);
 		stop();
 	}
 	
 	public void turnRight() throws ConnectionLostException
 	{
-		driveDirect(300, -300);
-		SystemClock.sleep(700);
+		driveDirect(150, -150);
+		SystemClock.sleep(1400);
 		stop();
 	}
 	
