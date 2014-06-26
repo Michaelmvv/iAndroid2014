@@ -29,8 +29,8 @@ public class Lada extends IRobotCreateAdapter
 	public void initialize() throws ConnectionLostException
 	{
 		myRobot = new Robot(dashboard, this, sonar);
-		myRobot.log("iAndroid2014 version 0.0.1");
-		myRobot.log("Ready!");
+		//myRobot.log("iAndroid2014 version 0.0.1");
+		//myRobot.log("Ready!");
 		
 		
 	}
@@ -39,6 +39,8 @@ public class Lada extends IRobotCreateAdapter
 	{
 		//myRobot.followStraightWall(/*speed (450 max)*/ 300,/*turn speed*/ 10, /*buffer distance*/ 5, /*distance*/ 30, /*wall*/ "Right", /*sleep time*/ 50);	
 		myRobot.doRightWallHugging(30);
+		//myRobot.log("compass" + myRobot.readCompass());
+		//SystemClock.sleep(1000);
 	}
 	
 	

@@ -14,12 +14,16 @@ public class Robot {
 	private Lada lada;
 	private final Dashboard dashboard;
 	private UltraSonicSensors sonar;
-	private int TURN_SPEED = 25;
+	private int TURN_SPEED = 150;
 
 	// for maintain heading
 	private int initialHeading;
 	public int leftSpeed = 0;
 	public int rightSpeed = 0;
+	
+	public boolean hit;
+	public boolean hitLeft;
+	public boolean hitRight;
 
 	public Robot(Dashboard dashboard, Lada lada, UltraSonicSensors sonar) {
 		this.dashboard = dashboard;
@@ -44,7 +48,19 @@ public class Robot {
 		int totalDistance = 0;
 		lada.readSensors(Lada.SENSORS_GROUP_ID6);
 		lada.driveDirect(200, 200);
-		while (totalDistance < centimeters * 10) {
+		while ((totalDistance < centimeters * 10)) {
+			if(this.lada.isBumpLeft()){
+				this.dashboard.log("Left Bump Hit");
+				hit = true;
+				hitLeft = true;
+				break;
+			}
+			if(this.lada.isBumpRight()){
+				this.dashboard.log("Right Bump Hit");
+				hit = true;
+				hitRight = true;
+				break;
+			}
 			lada.readSensors(Lada.SENSORS_GROUP_ID6);
 			int dd = lada.getDistance();
 			totalDistance += dd;
@@ -57,21 +73,24 @@ public class Robot {
 		lada.driveDirect(0, 0);
 	}
 
-	public void turnToHeading(int desiredHeading)
-			throws ConnectionLostException {
+	public void turnToHeading(int desiredHeading) throws ConnectionLostException
+	{
 		int currentHeading = readCompass();
 		int delta = currentHeading - desiredHeading;
 		log("Current Heading:" + currentHeading);
-		if (delta <= 3) {
-			stop();
-			TURN_SPEED = 1;
-		} else {
-			if (delta > 0 && delta <= 180 || delta < 0 && delta >= 180) {
+		while(delta > 3 )
+		{
+			if (delta > 0 && delta <= 180 || delta < 0 && delta >= 180)
+			{
 				rotateLeft();
-			} else {
+			}
+			else
+			{
 				rotateRight();
 			}
+			delta = readCompass() - desiredHeading;
 		}
+		stop();
 	}
 
 	public int readCompass() {
@@ -79,11 +98,11 @@ public class Robot {
 	}
 
 	public void rotateRight() throws ConnectionLostException {
-		lada.driveDirect(-TURN_SPEED, TURN_SPEED);
+		this.driveDirect(TURN_SPEED, -TURN_SPEED);
 	}
 
 	public void rotateLeft() throws ConnectionLostException {
-		lada.driveDirect(TURN_SPEED, -TURN_SPEED);
+		this.driveDirect(-TURN_SPEED, TURN_SPEED);
 	}
 
 	// fixes lada.driveDirect() by switching the order of the arguments
@@ -144,16 +163,29 @@ public class Robot {
 
 	}
 	
+	public void doGoldRush() throws ConnectionLostException {
+		findIR();
+	}
 	
+	public void findIR() throws ConnectionLostException {
+		if(!(this.lada.getInfraredByte() == 255)){
+			rotateRight();
+			SystemClock.sleep(50);
+		}
+	}
 	
 	public void forwardOneSpace() throws ConnectionLostException, InterruptedException{
-		if(this.getFrontDistance() < 50){
+		this.dashboard.log("Im here in the FOS method!");
+		if(this.getFrontDistance() < 50) {
 			this.dashboard.log("Going forward sensor dis : " + (this.getFrontDistance() - 10));
+			goForward(this.getFrontDistance() - 10);
+		}else if (this.getFrontDistance() > 70 && this.getFrontDistance() < 100){
 			goForward(this.getFrontDistance() - 10);
 		}else{
 		this.dashboard.log("Going forward static dis");
 		this.goForward(61);
 		}
+		this.dashboard.log("Im done with the FOS method, returning!");
 	}
 	
 	public void doRightWallHugging(int wallDis) throws ConnectionLostException, InterruptedException
@@ -161,27 +193,36 @@ public class Robot {
 		
 		lada.readSensors(Lada.SENSORS_GROUP_ID6);
 		this.dashboard.log("Sensors Read");
-		if(this.lada.isBumpLeft() && this.lada.isBumpRight()){
-			this.driveDirect(-100, -100);
-			SystemClock.sleep(500);
+		if(hitLeft){
+			this.dashboard.log("Starting left Corection");
 			stop();
-		}else if(this.lada.isBumpLeft()){
-			stop();
+			this.dashboard.log("BEEP backing up...");
 			this.driveDirect(-200, -200);
 			SystemClock.sleep(500);
 			stop();
+			this.dashboard.log("Turning...");
 			this.rotateRight();
-			SystemClock.sleep(500);
+			SystemClock.sleep(700);
 			stop();
-		}else if(this.lada.isBumpRight()){
+			this.dashboard.log("K, iv reset the bumping vars");
+			hitLeft = false;
+			hit = false;
+		}else if(hitRight){
+			this.dashboard.log("Starting Right Corection");
 			stop();
+			this.dashboard.log("BEEP backing up...");
 			this.driveDirect(-200, -200);
 			SystemClock.sleep(500);
 			stop();
+			this.dashboard.log("Turning...");
 			this.rotateLeft();
-			SystemClock.sleep(500);
+			SystemClock.sleep(700);
 			stop();
+			this.dashboard.log("K, iv reset the bumping vars");
+			hitRight = false;
+			hit = false;
 		}
+		
 		if(this.getRightDistance() > wallDis) {
 			this.dashboard.log("turningRight...");
 			turnRight();
@@ -281,4 +322,6 @@ public class Robot {
 		this.sonar.read();
 		return this.sonar.getFrontDistance();
 	}
+	
+	
 }
