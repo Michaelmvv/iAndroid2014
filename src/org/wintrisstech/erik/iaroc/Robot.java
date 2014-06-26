@@ -176,11 +176,15 @@ public class Robot {
 			this.dashboard.log("Going forward sensor dis : "
 					+ (this.getFrontDistance() - 10));
 			goForward(this.getFrontDistance() - 15);
+			if(hit == false){
 			bumpToCorrect();
+			}
 		} else if (this.getFrontDistance() > 70
 				&& this.getFrontDistance() < 100) {
 			goForward(this.getFrontDistance() - 15);
+			if(hit == false){
 			bumpToCorrect();
+			}
 		} else {
 			this.dashboard.log("Going forward static dis");
 			this.goForward(61);
@@ -254,7 +258,7 @@ public class Robot {
 
 		}
 		//speak("forward");
-		if(this.getRightDistance() < 80 && this.getLeftDistance() < 80){
+		if(this.getRightDistance() < 40 && this.getLeftDistance() < 40){
 		//aligns better by rotating
 		if((this.getRightDistance() - this.getLeftDistance()) > 4){
 			//speak("Sonic alignment right");
