@@ -1,6 +1,5 @@
 package org.wintrisstech.erik.iaroc;
 
-
 import org.wintrisstech.sensors.UltraSonicSensors;
 
 import android.os.SystemClock;
@@ -20,7 +19,7 @@ public class Robot {
 	private int initialHeading;
 	public int leftSpeed = 0;
 	public int rightSpeed = 0;
-	
+
 	public boolean hit;
 	public boolean hitLeft;
 	public boolean hitRight;
@@ -49,13 +48,13 @@ public class Robot {
 		lada.readSensors(Lada.SENSORS_GROUP_ID6);
 		lada.driveDirect(200, 200);
 		while ((totalDistance < centimeters * 10)) {
-			if(this.lada.isBumpLeft()){
+			if (this.lada.isBumpLeft()) {
 				this.dashboard.log("Left Bump Hit");
 				hit = true;
 				hitLeft = true;
 				break;
 			}
-			if(this.lada.isBumpRight()){
+			if (this.lada.isBumpRight()) {
 				this.dashboard.log("Right Bump Hit");
 				hit = true;
 				hitRight = true;
@@ -73,19 +72,15 @@ public class Robot {
 		lada.driveDirect(0, 0);
 	}
 
-	public void turnToHeading(int desiredHeading) throws ConnectionLostException
-	{
+	public void turnToHeading(int desiredHeading)
+			throws ConnectionLostException {
 		int currentHeading = readCompass();
 		int delta = currentHeading - desiredHeading;
 		log("Current Heading:" + currentHeading);
-		while(delta > 3 )
-		{
-			if (delta > 0 && delta <= 180 || delta < 0 && delta >= 180)
-			{
+		while (delta > 3) {
+			if (delta > 0 && delta <= 180 || delta < 0 && delta >= 180) {
 				rotateLeft();
-			}
-			else
-			{
+			} else {
 				rotateRight();
 			}
 			delta = readCompass() - desiredHeading;
@@ -110,17 +105,14 @@ public class Robot {
 		lada.driveDirect(right, left);
 	}
 
-	public void followStraightWall(int speed, int turnSpeed, int bufferDis, int distance, String side, int sleepTime)
+	public void followStraightWall(int speed, int turnSpeed, int bufferDis,
+			int distance, String side, int sleepTime)
 			throws ConnectionLostException, InterruptedException {
-	/*
-	 * Speed - turn - sleep -yes/no
-	 * 200 - 10 - 100 - yes, but slow
-	 * 450 - 20 - 100 - no
-	 * 450 - 30 - 100 - no
-	 * 300 - 15 - 100 - no
-	 * 300 - 15 - 50  - no
-	 * 300 - 10 - 50  - OK, needs work
-	 */
+		/*
+		 * Speed - turn - sleep -yes/no 200 - 10 - 100 - yes, but slow 450 - 20
+		 * - 100 - no 450 - 30 - 100 - no 300 - 15 - 100 - no 300 - 15 - 50 - no
+		 * 300 - 10 - 50 - OK, needs work
+		 */
 		if (side.equalsIgnoreCase("right")) {
 			int right = this.getRightDistance();
 			int delta = right - distance;
@@ -162,38 +154,52 @@ public class Robot {
 		SystemClock.sleep(sleepTime);
 
 	}
-	
+
 	public void doGoldRush() throws ConnectionLostException {
 		findIR();
 	}
-	
+
 	public void findIR() throws ConnectionLostException {
-		if(!(this.lada.getInfraredByte() == 255)){
+		if (!(this.lada.getInfraredByte() == 255)) {
 			rotateRight();
 			SystemClock.sleep(50);
 		}
 	}
-	
-	public void forwardOneSpace() throws ConnectionLostException, InterruptedException{
+
+	public void forwardOneSpace() throws ConnectionLostException,
+			InterruptedException {
 		this.dashboard.log("Im here in the FOS method!");
-		if(this.getFrontDistance() < 50) {
-			this.dashboard.log("Going forward sensor dis : " + (this.getFrontDistance() - 10));
-			goForward(this.getFrontDistance() - 10);
-		}else if (this.getFrontDistance() > 70 && this.getFrontDistance() < 100){
-			goForward(this.getFrontDistance() - 10);
-		}else{
-		this.dashboard.log("Going forward static dis");
-		this.goForward(61);
+		if (this.getFrontDistance() < 50) {
+			this.dashboard.log("Going forward sensor dis : "
+					+ (this.getFrontDistance() - 10));
+			goForward(this.getFrontDistance() - 15);
+			bumpToCorrect();
+		} else if (this.getFrontDistance() > 70
+				&& this.getFrontDistance() < 100) {
+			goForward(this.getFrontDistance() - 15);
+			bumpToCorrect();
+		} else {
+			this.dashboard.log("Going forward static dis");
+			this.goForward(61);
 		}
 		this.dashboard.log("Im done with the FOS method, returning!");
 	}
 	
-	public void doRightWallHugging(int wallDis) throws ConnectionLostException, InterruptedException
-	{
-		
+	public void bumpToCorrect() throws ConnectionLostException{
+		this.driveDirect(60, 60);
+		SystemClock.sleep(3000);
+		stop();
+		this.driveDirect(-100, -100);
+		SystemClock.sleep(2000);
+		stop();
+	}
+
+	public void doRightWallHugging(int wallDis) throws ConnectionLostException,
+			InterruptedException {
+
 		lada.readSensors(Lada.SENSORS_GROUP_ID6);
 		this.dashboard.log("Sensors Read");
-		if(hitLeft){
+		if (hitLeft) {
 			this.dashboard.log("Starting left Corection");
 			stop();
 			this.dashboard.log("BEEP backing up...");
@@ -202,12 +208,12 @@ public class Robot {
 			stop();
 			this.dashboard.log("Turning...");
 			this.rotateRight();
-			SystemClock.sleep(700);
+			SystemClock.sleep(600);
 			stop();
 			this.dashboard.log("K, iv reset the bumping vars");
 			hitLeft = false;
 			hit = false;
-		}else if(hitRight){
+		} else if (hitRight) {
 			this.dashboard.log("Starting Right Corection");
 			stop();
 			this.dashboard.log("BEEP backing up...");
@@ -216,24 +222,24 @@ public class Robot {
 			stop();
 			this.dashboard.log("Turning...");
 			this.rotateLeft();
-			SystemClock.sleep(700);
+			SystemClock.sleep(600);
 			stop();
 			this.dashboard.log("K, iv reset the bumping vars");
 			hitRight = false;
 			hit = false;
 		}
-		
-		if(this.getRightDistance() > wallDis) {
+
+		if (this.getRightDistance() > wallDis) {
 			this.dashboard.log("turningRight...");
 			turnRight();
 			this.dashboard.log("Finished Turn!   MOVING...");
 			forwardOneSpace();
 			this.dashboard.log("Moved Forward");
-		} else if(this.getFrontDistance() > wallDis) {
+		} else if (this.getFrontDistance() > wallDis) {
 			this.dashboard.log("MOVING...");
 			forwardOneSpace();
 			this.dashboard.log("Moved Forward");
-		} else if(this.getLeftDistance() > wallDis) {
+		} else if (this.getLeftDistance() > wallDis) {
 			this.dashboard.log("turningLeft...");
 			turnLeft();
 			this.dashboard.log("Finished Turn!   MOVING...");
@@ -246,38 +252,37 @@ public class Robot {
 			forwardOneSpace();
 		}
 	}
-	
-	public void turnLeft() throws ConnectionLostException
-	{
+
+	public void turnLeft() throws ConnectionLostException {
 		this.driveDirect(-150, 150);
 		SystemClock.sleep(1400);
 		stop();
 	}
-	
-	public void turnRight() throws ConnectionLostException
-	{
+
+	public void turnRight() throws ConnectionLostException {
 		driveDirect(150, -150);
 		SystemClock.sleep(1400);
 		stop();
 	}
-	
+
 	public void turnAround() throws ConnectionLostException {
 		turnRight();
 		turnRight();
 	}
-	
-	public void michaelsFollowStraightWall(int speed, String side,int sleepTime) throws ConnectionLostException, InterruptedException {
+
+	public void michaelsFollowStraightWall(int speed, String side, int sleepTime)
+			throws ConnectionLostException, InterruptedException {
 		if (side.equalsIgnoreCase("Right")) {
-		//	int right = this.getRightDistance();
-			
+			// int right = this.getRightDistance();
+
 		}
-		
+
 	}
 
 	public void timer() {
 
 	}
-	
+
 	// gets called on an interval
 	// adjusts the left/right wheel speed
 	public void maintainHeadingLogic() {
@@ -308,20 +313,22 @@ public class Robot {
 	public int getLeftDistance() throws ConnectionLostException,
 			InterruptedException {
 		this.sonar.read();
+		SystemClock.sleep(100);
 		return this.sonar.getLeftDistance();
 	}
 
 	public int getRightDistance() throws ConnectionLostException,
 			InterruptedException {
 		this.sonar.read();
+		SystemClock.sleep(100);
 		return this.sonar.getRightDistance();
 	}
 
 	public int getFrontDistance() throws ConnectionLostException,
 			InterruptedException {
 		this.sonar.read();
+		SystemClock.sleep(100);
 		return this.sonar.getFrontDistance();
 	}
-	
-	
+
 }
