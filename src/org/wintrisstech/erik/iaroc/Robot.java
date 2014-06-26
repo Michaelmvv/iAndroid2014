@@ -9,7 +9,7 @@ import ioio.lib.api.exception.ConnectionLostException;
  * A class to abstract an higher level API to control the robot
  **************************************************************************/
 public class Robot {
-
+    private Boolean isSpeakEnabled = true;
 	private Lada lada;
 	private final Dashboard dashboard;
 	private UltraSonicSensors sonar;
@@ -40,7 +40,9 @@ public class Robot {
 	}
 
 	public void speak(String message) {
-		dashboard.speak(message);
+		if (isSpeakEnabled == true) {
+			dashboard.speak(message);
+		}
 	}
 
 	public void goForward(int centimeters) throws ConnectionLostException {
@@ -63,7 +65,7 @@ public class Robot {
 			lada.readSensors(Lada.SENSORS_GROUP_ID6);
 			int dd = lada.getDistance();
 			totalDistance += dd;
-			log("" + totalDistance / 10 + " cm");
+			//log("" + totalDistance / 10 + " cm");
 		}
 		stop();
 	}
@@ -87,6 +89,7 @@ public class Robot {
 		}
 		stop();
 	}
+
 
 	public int readCompass() {
 		return (int) (dashboard.getAzimuth() + 360) % 360;
@@ -200,6 +203,7 @@ public class Robot {
 		lada.readSensors(Lada.SENSORS_GROUP_ID6);
 		this.dashboard.log("Sensors Read");
 		if (hitLeft) {
+			//speak("left Bump Correction");
 			this.dashboard.log("Starting left Corection");
 			stop();
 			this.dashboard.log("BEEP backing up...");
@@ -213,8 +217,11 @@ public class Robot {
 			this.dashboard.log("K, iv reset the bumping vars");
 			hitLeft = false;
 			hit = false;
+			driveDirect(200, 200);
+			SystemClock.sleep(1000);
 		} else if (hitRight) {
-			this.dashboard.log("Starting Right Corection");
+			//speak("Right Bump Correction");
+			this.dashboard.log("Starting bump Right Correction");
 			stop();
 			this.dashboard.log("BEEP backing up...");
 			this.driveDirect(-200, -200);
@@ -227,30 +234,43 @@ public class Robot {
 			this.dashboard.log("K, iv reset the bumping vars");
 			hitRight = false;
 			hit = false;
+		    driveDirect(200, 200);
+		    SystemClock.sleep(1000);
 		}
 
 		if (this.getRightDistance() > wallDis) {
+			//speak("turning right");
 			this.dashboard.log("turningRight...");
 			turnRight();
-			this.dashboard.log("Finished Turn!   MOVING...");
-			forwardOneSpace();
-			this.dashboard.log("Moved Forward");
 		} else if (this.getFrontDistance() > wallDis) {
-			this.dashboard.log("MOVING...");
-			forwardOneSpace();
-			this.dashboard.log("Moved Forward");
+
 		} else if (this.getLeftDistance() > wallDis) {
+			//speak("turning left");
 			this.dashboard.log("turningLeft...");
 			turnLeft();
-			this.dashboard.log("Finished Turn!   MOVING...");
-			forwardOneSpace();
-			this.dashboard.log("Moved Forward");
 		} else {
 			this.dashboard.log("Turning Around...");
 			turnAround();
-			this.dashboard.log("Finished Turn!   MOVING...");
-			forwardOneSpace();
+
 		}
+		//speak("forward");
+		if(this.getRightDistance() < 80 && this.getLeftDistance() < 80){
+		//aligns better by rotating
+		if((this.getRightDistance() - this.getLeftDistance()) > 4){
+			//speak("Sonic alignment right");
+			rotateRight();
+			SystemClock.sleep(120);
+			stop();
+	    }else if((this.getLeftDistance() - this.getRightDistance()) > 4){
+	    	//speak("Sonic alignment left");
+	    	rotateLeft();
+	    	SystemClock.sleep(120);
+	    	stop();
+	    }
+	}
+		this.dashboard.log("Finished Turn!   MOVING...");
+		forwardOneSpace();
+		this.dashboard.log("Moved Forward");
 	}
 
 	public void turnLeft() throws ConnectionLostException {
@@ -312,6 +332,7 @@ public class Robot {
 
 	public int getLeftDistance() throws ConnectionLostException,
 			InterruptedException {
+		this.dashboard.log("Reading Left");
 		this.sonar.read();
 		SystemClock.sleep(100);
 		return this.sonar.getLeftDistance();
@@ -319,6 +340,7 @@ public class Robot {
 
 	public int getRightDistance() throws ConnectionLostException,
 			InterruptedException {
+		this.dashboard.log("Reading Right");
 		this.sonar.read();
 		SystemClock.sleep(100);
 		return this.sonar.getRightDistance();
@@ -326,6 +348,7 @@ public class Robot {
 
 	public int getFrontDistance() throws ConnectionLostException,
 			InterruptedException {
+		this.log("In getFrontDistance...");
 		this.sonar.read();
 		SystemClock.sleep(100);
 		return this.sonar.getFrontDistance();
