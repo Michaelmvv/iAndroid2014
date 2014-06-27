@@ -9,11 +9,16 @@ import ioio.lib.api.exception.ConnectionLostException;
  * A class to abstract an higher level API to control the robot
  **************************************************************************/
 public class Robot {
-    private Boolean isSpeakEnabled = true;
+	private Boolean isSpeakEnabled = true;
 	private Lada lada;
 	private final Dashboard dashboard;
 	private UltraSonicSensors sonar;
 	private int TURN_SPEED = 150;
+
+	// for gold rush
+	public int IrCheckFrequency;
+	public int GRloopsElapsed;
+	public int IRloop = 0;
 
 	// for maintain heading
 	private int initialHeading;
@@ -65,7 +70,7 @@ public class Robot {
 			lada.readSensors(Lada.SENSORS_GROUP_ID6);
 			int dd = lada.getDistance();
 			totalDistance += dd;
-			//log("" + totalDistance / 10 + " cm");
+			// log("" + totalDistance / 10 + " cm");
 		}
 		stop();
 	}
@@ -89,7 +94,6 @@ public class Robot {
 		}
 		stop();
 	}
-
 
 	public int readCompass() {
 		return (int) (dashboard.getAzimuth() + 360) % 360;
@@ -158,17 +162,6 @@ public class Robot {
 
 	}
 
-	public void doGoldRush() throws ConnectionLostException {
-		findIR();
-	}
-
-	public void findIR() throws ConnectionLostException {
-		if (!(this.lada.getInfraredByte() == 255)) {
-			rotateRight();
-			SystemClock.sleep(50);
-		}
-	}
-
 	public void forwardOneSpace() throws ConnectionLostException,
 			InterruptedException {
 		this.dashboard.log("Im here in the FOS method!");
@@ -176,14 +169,14 @@ public class Robot {
 			this.dashboard.log("Going forward sensor dis : "
 					+ (this.getFrontDistance() - 10));
 			goForward(this.getFrontDistance() - 15);
-			if(hit == false){
-			bumpToCorrect();
+			if (hit == false) {
+				bumpToCorrect();
 			}
 		} else if (this.getFrontDistance() > 70
 				&& this.getFrontDistance() < 100) {
 			goForward(this.getFrontDistance() - 15);
-			if(hit == false){
-			bumpToCorrect();
+			if (hit == false) {
+				bumpToCorrect();
 			}
 		} else {
 			this.dashboard.log("Going forward static dis");
@@ -191,8 +184,8 @@ public class Robot {
 		}
 		this.dashboard.log("Im done with the FOS method, returning!");
 	}
-	
-	public void bumpToCorrect() throws ConnectionLostException{
+
+	public void bumpToCorrect() throws ConnectionLostException {
 		this.driveDirect(60, 60);
 		SystemClock.sleep(3000);
 		stop();
@@ -207,7 +200,7 @@ public class Robot {
 		lada.readSensors(Lada.SENSORS_GROUP_ID6);
 		this.dashboard.log("Sensors Read");
 		if (hitLeft) {
-			//speak("left Bump Correction");
+			// speak("left Bump Correction");
 			this.dashboard.log("Starting left Corection");
 			stop();
 			this.dashboard.log("BEEP backing up...");
@@ -224,7 +217,7 @@ public class Robot {
 			driveDirect(200, 200);
 			SystemClock.sleep(1000);
 		} else if (hitRight) {
-			//speak("Right Bump Correction");
+			// speak("Right Bump Correction");
 			this.dashboard.log("Starting bump Right Correction");
 			stop();
 			this.dashboard.log("BEEP backing up...");
@@ -238,18 +231,18 @@ public class Robot {
 			this.dashboard.log("K, iv reset the bumping vars");
 			hitRight = false;
 			hit = false;
-		    driveDirect(200, 200);
-		    SystemClock.sleep(1000);
+			driveDirect(200, 200);
+			SystemClock.sleep(1000);
 		}
 
 		if (this.getRightDistance() > wallDis) {
-			//speak("turning right");
+			// speak("turning right");
 			this.dashboard.log("turningRight...");
 			turnRight();
 		} else if (this.getFrontDistance() > wallDis) {
 
 		} else if (this.getLeftDistance() > wallDis) {
-			//speak("turning left");
+			// speak("turning left");
 			this.dashboard.log("turningLeft...");
 			turnLeft();
 		} else {
@@ -257,21 +250,21 @@ public class Robot {
 			turnAround();
 
 		}
-		//speak("forward");
-		if(this.getRightDistance() < 40 && this.getLeftDistance() < 40){
-		//aligns better by rotating
-		if((this.getRightDistance() - this.getLeftDistance()) > 4){
-			//speak("Sonic alignment right");
-			rotateRight();
-			SystemClock.sleep(120);
-			stop();
-	    }else if((this.getLeftDistance() - this.getRightDistance()) > 4){
-	    	//speak("Sonic alignment left");
-	    	rotateLeft();
-	    	SystemClock.sleep(120);
-	    	stop();
-	    }
-	}
+		// speak("forward");
+		if (this.getRightDistance() < 40 && this.getLeftDistance() < 40) {
+			// aligns better by rotating
+			if ((this.getRightDistance() - this.getLeftDistance()) > 4) {
+				// speak("Sonic alignment right");
+				rotateRight();
+				SystemClock.sleep(120);
+				stop();
+			} else if ((this.getLeftDistance() - this.getRightDistance()) > 4) {
+				// speak("Sonic alignment left");
+				rotateLeft();
+				SystemClock.sleep(120);
+				stop();
+			}
+		}
 		this.dashboard.log("Finished Turn!   MOVING...");
 		forwardOneSpace();
 		this.dashboard.log("Moved Forward");
@@ -328,6 +321,76 @@ public class Robot {
 			leftSpeed = 100;
 		}
 	}
+	
+	public int getIR() throws ConnectionLostException{
+		this.lada.readSensors(Lada.SENSORS_GROUP_ID6);
+		int ir = this.lada.getInfraredByte();
+		return ir;
+	}
+	
+	public void doGoldRush() throws ConnectionLostException{
+		IRloop++;
+		if(IRloop > 2){
+			IRloop = 0;
+			if (findIR()){
+				goForward(30);
+			}
+		}
+		goForward(30);
+		if(hitRight){
+			this.driveDirect(-100, -100);
+			SystemClock.sleep(1500);
+			rotateLeft();
+			SystemClock.sleep(1000);
+			hit = false;
+			hitRight = false;
+			hitLeft = false;
+		}else if(hitLeft){
+			this.driveDirect(-100, -100);
+			SystemClock.sleep(1500);
+			rotateRight();
+			SystemClock.sleep(1000);
+			hit = false;
+			hitRight = false;
+			hitLeft = false;
+		}else{
+			
+		}
+		
+	}
+	
+	public boolean foundIR() throws ConnectionLostException{
+		return (getIR() != 255);
+	}
+
+	public boolean findIR() throws ConnectionLostException {
+			
+		for(int j=1; j < 25; j=j+1)
+		{
+			this.driveDirect(150, -150);
+			SystemClock.sleep(200);
+			stop();
+			if (foundIR()){
+				dashboard.log("found IR!");
+				return true;
+			}
+			//return false;
+		}
+		return false;
+	}
+
+	public void toIR() throws ConnectionLostException {
+		this.lada.readSensors(Lada.SENSORS_GROUP_ID6);
+		this.driveDirect(200, 200);
+		SystemClock.sleep(2000);
+		if ((this.lada.getInfraredByte() == 255)) {
+			findIR();
+		} else {
+			toIR();
+		}
+	}
+
+
 
 	//
 	public void maintainHeading() throws ConnectionLostException {
