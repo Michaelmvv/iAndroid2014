@@ -39,14 +39,15 @@ public class Lada extends IRobotCreateAdapter
 	{
 
 		//Drag Race
-		//myRobot.followStraightWall(/*speed (450 max)*/ 300,/*turn speed*/ 10, /*buffer distance*/ 5, /*distance*/ 30, /*wall*/ "Right", /*sleep time*/ 50);		
+		//myRobot.followStraightWall(/*speed (450 max)*/ 300,/*turn speed*/ 10, /*buffer distance*/ 3, /*distance*/ 30, /*wall*/ "Right", /*sleep time*/ 50);		
 		
 		
 		//myRobot.doGoldRush();
 
 		//Maze
-		//myRobot.doRightWallHugging(30);
-		//SystemClock.sleep(2000); /*Comment Sleep out for Race*/ 
+		myRobot.doWallHugging(30,"Right");
+		//before it was 2000
+		SystemClock.sleep(1000); /*Comment Sleep out for Race*/ 
 	}
 	
 	

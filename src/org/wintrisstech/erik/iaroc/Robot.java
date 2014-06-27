@@ -116,9 +116,13 @@ public class Robot {
 			int distance, String side, int sleepTime)
 			throws ConnectionLostException, InterruptedException {
 		/*
-		 * Speed - turn - sleep -yes/no 200 - 10 - 100 - yes, but slow 450 - 20
-		 * - 100 - no 450 - 30 - 100 - no 300 - 15 - 100 - no 300 - 15 - 50 - no
-		 * 300 - 10 - 50 - OK, needs work
+		 * Speed - turn - sleep -yes/no, 200 - 10 - 100 - yes, but slow, 450 -
+		 * 20- 100 - no , 450 - 30 - 100 - no , 300 - 15 - 100 - no , 300 - 15 -
+		 * 50 - no, 300 - 10 - 50 - OK, needs work, 300 - 10 - 50 - Buffer: 3
+		 * -worked Well, 350 - 10 - 50 - Buffer:3 - Worked, 400 - 10 - 50 -
+		 * Buffer:3 - Not working, 400 - 10 - 30 - Buffer:3 - Not working, 400 -
+		 * 10 - 30 - Buffer:1 - Not working, 400 - 7 - 30 - Buffer:1 - not
+		 * working, 400 - 6 - 30 - Buffer:1 - Not working,
 		 */
 		if (side.equalsIgnoreCase("right")) {
 			int right = this.getRightDistance();
@@ -194,8 +198,8 @@ public class Robot {
 		stop();
 	}
 
-	public void doRightWallHugging(int wallDis) throws ConnectionLostException,
-			InterruptedException {
+	public void doWallHugging(int wallDis, String side)
+			throws ConnectionLostException, InterruptedException {
 
 		lada.readSensors(Lada.SENSORS_GROUP_ID6);
 		this.dashboard.log("Sensors Read");
@@ -209,7 +213,7 @@ public class Robot {
 			stop();
 			this.dashboard.log("Turning...");
 			this.rotateRight();
-			SystemClock.sleep(600);
+			SystemClock.sleep(400);
 			stop();
 			this.dashboard.log("K, iv reset the bumping vars");
 			hitLeft = false;
@@ -226,7 +230,7 @@ public class Robot {
 			stop();
 			this.dashboard.log("Turning...");
 			this.rotateLeft();
-			SystemClock.sleep(600);
+			SystemClock.sleep(400);
 			stop();
 			this.dashboard.log("K, iv reset the bumping vars");
 			hitRight = false;
@@ -234,21 +238,42 @@ public class Robot {
 			driveDirect(200, 200);
 			SystemClock.sleep(1000);
 		}
+		if (side.equalsIgnoreCase("Right")) {
 
-		if (this.getRightDistance() > wallDis) {
-			// speak("turning right");
-			this.dashboard.log("turningRight...");
-			turnRight();
-		} else if (this.getFrontDistance() > wallDis) {
+			if (this.getRightDistance() > wallDis) {
+				// speak("turning right");
+				this.dashboard.log("turningRight...");
+				turnRight();
+			} else if (this.getFrontDistance() > wallDis) {
 
-		} else if (this.getLeftDistance() > wallDis) {
-			// speak("turning left");
-			this.dashboard.log("turningLeft...");
-			turnLeft();
+			} else if (this.getLeftDistance() > wallDis) {
+				// speak("turning left");
+				this.dashboard.log("turningLeft...");
+				turnLeft();
+			} else {
+				this.dashboard.log("Turning Around...");
+				turnAround();
+			}
+
+		} else if (side.equalsIgnoreCase("Left")) {
+			if (this.getLeftDistance() > wallDis) {
+				// speak("turning left");
+				this.dashboard.log("turningLeft...");
+				turnLeft();
+			} else if (this.getFrontDistance() > wallDis) {
+
+			} else if (this.getRightDistance() > wallDis) {
+				// speak("turning right");
+				this.dashboard.log("turningRight...");
+				turnRight();
+			} else {
+				this.dashboard.log("Turning Around...");
+				turnAround();
+			}
+
 		} else {
-			this.dashboard.log("Turning Around...");
-			turnAround();
-
+			dashboard.log("Error in side String");
+			dashboard.log("Its Value was: " + side);
 		}
 		// speak("forward");
 		if (this.getRightDistance() < 40 && this.getLeftDistance() < 40) {
@@ -321,23 +346,23 @@ public class Robot {
 			leftSpeed = 100;
 		}
 	}
-	
-	public int getIR() throws ConnectionLostException{
+
+	public int getIR() throws ConnectionLostException {
 		this.lada.readSensors(Lada.SENSORS_GROUP_ID6);
 		int ir = this.lada.getInfraredByte();
 		return ir;
 	}
-	
-	public void doGoldRush() throws ConnectionLostException{
+
+	public void doGoldRush() throws ConnectionLostException {
 		IRloop++;
-		if(IRloop > 2){
+		if (IRloop > 2) {
 			IRloop = 0;
-			if (findIR()){
+			if (findIR()) {
 				goForward(30);
 			}
 		}
 		goForward(30);
-		if(hitRight){
+		if (hitRight) {
 			this.driveDirect(-100, -100);
 			SystemClock.sleep(1500);
 			rotateLeft();
@@ -345,7 +370,7 @@ public class Robot {
 			hit = false;
 			hitRight = false;
 			hitLeft = false;
-		}else if(hitLeft){
+		} else if (hitLeft) {
 			this.driveDirect(-100, -100);
 			SystemClock.sleep(1500);
 			rotateRight();
@@ -353,28 +378,27 @@ public class Robot {
 			hit = false;
 			hitRight = false;
 			hitLeft = false;
-		}else{
-			
+		} else {
+
 		}
-		
+
 	}
-	
-	public boolean foundIR() throws ConnectionLostException{
+
+	public boolean foundIR() throws ConnectionLostException {
 		return (getIR() != 255);
 	}
 
 	public boolean findIR() throws ConnectionLostException {
-			
-		for(int j=1; j < 25; j=j+1)
-		{
+
+		for (int j = 1; j < 25; j = j + 1) {
 			this.driveDirect(150, -150);
 			SystemClock.sleep(200);
 			stop();
-			if (foundIR()){
+			if (foundIR()) {
 				dashboard.log("found IR!");
 				return true;
 			}
-			//return false;
+			// return false;
 		}
 		return false;
 	}
@@ -389,8 +413,6 @@ public class Robot {
 			toIR();
 		}
 	}
-
-
 
 	//
 	public void maintainHeading() throws ConnectionLostException {
