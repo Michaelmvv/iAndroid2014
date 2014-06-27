@@ -71,7 +71,7 @@ public class UltraSonicSensors
 		strobe.write(true);
 		input = ioio.openPulseInput(inputPin, PulseMode.POSITIVE);
 		ioio.endBatch();
-		SystemClock.sleep(20);
+		SystemClock.sleep(40);
 		strobe.write(false);
 		distance += (int) (input.getDuration() * CONVERSION_FACTOR);
 		input.close();
