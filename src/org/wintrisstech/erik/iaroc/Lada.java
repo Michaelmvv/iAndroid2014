@@ -41,6 +41,7 @@ public class Lada extends IRobotCreateAdapter
 		
 		//presentation
 		//myRobot.presentation();
+	
 
 		//Drag Race
 		//used to be 315 speed
