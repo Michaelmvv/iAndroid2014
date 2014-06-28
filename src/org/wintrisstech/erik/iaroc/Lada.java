@@ -33,13 +33,18 @@ public class Lada extends IRobotCreateAdapter
 		//myRobot.log("Ready!");
 		
 		
+		
 	}
 	
 	public void loop() throws ConnectionLostException, InterruptedException
 	{
+		
+		//presentation
+		//myRobot.presentation();
 
 		//Drag Race
-		//myRobot.followStraightWall(/*speed (450 max)*/ 300,/*turn speed*/ 10, /*buffer distance*/ 3, /*distance*/ 30, /*wall*/ "Right", /*sleep time*/ 50);		
+		//used to be 315 speed
+		//myRobot.followStraightWall(/*speed (450 max)*/ 360,/*turn speed*/ 7, /*buffer distance*/ 2, /*distance*/ 48, /*wall*/ "Right", /*sleep time*/ 30);		
 		
 		
 		//myRobot.doGoldRush();
@@ -47,7 +52,7 @@ public class Lada extends IRobotCreateAdapter
 		//Maze
 		myRobot.doWallHugging(30,"Right");
 		//before it was 2000
-		SystemClock.sleep(1000); /*Comment Sleep out for Race*/ 
+		SystemClock.sleep(500); /*Comment Sleep out for Race*/ 
 	}
 	
 	
@@ -68,7 +73,7 @@ public class Lada extends IRobotCreateAdapter
 	public void goToHeading(int heading) throws ConnectionLostException
 	{
 		int currentHeading = (int)	 dashboard.getAzimuth() %360;
-//TODO Get the compass heading working
+
 		while (heading != currentHeading)
 		{
 			currentHeading = (int) dashboard.getAzimuth()  %360;

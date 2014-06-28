@@ -15,6 +15,8 @@ public class Robot {
 	private UltraSonicSensors sonar;
 	private int TURN_SPEED = 150;
 
+	public boolean spinning = true;
+
 	// for gold rush
 	public int IrCheckFrequency;
 	public int GRloopsElapsed;
@@ -48,6 +50,32 @@ public class Robot {
 		if (isSpeakEnabled == true) {
 			dashboard.speak(message);
 		}
+	}
+
+	public void presentation() throws ConnectionLostException,
+			InterruptedException {
+		lada.readSensors(Lada.SENSORS_GROUP_ID6);
+		if (this.lada.isBumpLeft() || this.lada.isBumpRight()) {
+
+			if (spinning) {
+				spinning = false;
+				
+			} else {
+				spinning = true;
+				SystemClock.sleep(1000);
+			}
+		}
+		if (spinning) {
+			this.driveDirect(40, -40);
+			SystemClock.sleep(1000);
+		} else {
+			stop();
+		}
+
+		dashboard.log("FrontDistance: " + getFrontDistance());
+		dashboard.log("LeftDistance: " + getLeftDistance());
+		dashboard.log("RightDistance: " + getRightDistance());
+
 	}
 
 	public void goForward(int centimeters) throws ConnectionLostException {
@@ -196,6 +224,10 @@ public class Robot {
 		this.driveDirect(-100, -100);
 		SystemClock.sleep(2000);
 		stop();
+		if(foundIR()){
+			this.driveDirect(-400, 400);
+			SystemClock.sleep(200000);
+		}
 	}
 
 	public void doWallHugging(int wallDis, String side)
@@ -204,7 +236,7 @@ public class Robot {
 		lada.readSensors(Lada.SENSORS_GROUP_ID6);
 		this.dashboard.log("Sensors Read");
 		if (hitLeft) {
-			// speak("left Bump Correction");
+			// speak("left Bump Correction"); <- crashes
 			this.dashboard.log("Starting left Corection");
 			stop();
 			this.dashboard.log("BEEP backing up...");
@@ -215,11 +247,12 @@ public class Robot {
 			this.rotateRight();
 			SystemClock.sleep(400);
 			stop();
-			this.dashboard.log("K, iv reset the bumping vars");
+			this.dashboard.log("Okay, I have reset the bumping variables.");
 			hitLeft = false;
 			hit = false;
 			driveDirect(200, 200);
 			SystemClock.sleep(1000);
+			return; // break out of the loop
 		} else if (hitRight) {
 			// speak("Right Bump Correction");
 			this.dashboard.log("Starting bump Right Correction");
@@ -237,6 +270,7 @@ public class Robot {
 			hit = false;
 			driveDirect(200, 200);
 			SystemClock.sleep(1000);
+			return; // break out of the loop
 		}
 		if (side.equalsIgnoreCase("Right")) {
 
@@ -297,13 +331,13 @@ public class Robot {
 
 	public void turnLeft() throws ConnectionLostException {
 		this.driveDirect(-150, 150);
-		SystemClock.sleep(1400);
+		SystemClock.sleep(1450);
 		stop();
 	}
 
 	public void turnRight() throws ConnectionLostException {
 		driveDirect(150, -150);
-		SystemClock.sleep(1400);
+		SystemClock.sleep(1450);
 		stop();
 	}
 
