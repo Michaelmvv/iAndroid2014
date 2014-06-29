@@ -59,7 +59,7 @@ public class Robot {
 
 			if (spinning) {
 				spinning = false;
-				
+
 			} else {
 				spinning = true;
 				SystemClock.sleep(1000);
@@ -219,12 +219,12 @@ public class Robot {
 
 	public void bumpToCorrect() throws ConnectionLostException {
 		this.driveDirect(60, 60);
-		SystemClock.sleep(3000);
+		SystemClock.sleep(3500);
 		stop();
 		this.driveDirect(-100, -100);
 		SystemClock.sleep(2000);
 		stop();
-		if(foundIR()){
+		if (foundIR()) {
 			this.driveDirect(-400, 400);
 			SystemClock.sleep(200000);
 		}
@@ -251,7 +251,7 @@ public class Robot {
 			hitLeft = false;
 			hit = false;
 			driveDirect(200, 200);
-			SystemClock.sleep(1000);
+			SystemClock.sleep(400);
 			return; // break out of the loop
 		} else if (hitRight) {
 			// speak("Right Bump Correction");
@@ -269,7 +269,7 @@ public class Robot {
 			hitRight = false;
 			hit = false;
 			driveDirect(200, 200);
-			SystemClock.sleep(1000);
+			SystemClock.sleep(400);
 			return; // break out of the loop
 		}
 		if (side.equalsIgnoreCase("Right")) {
@@ -331,19 +331,25 @@ public class Robot {
 
 	public void turnLeft() throws ConnectionLostException {
 		this.driveDirect(-150, 150);
-		SystemClock.sleep(1450);
+		SystemClock.sleep(1500);
 		stop();
 	}
 
 	public void turnRight() throws ConnectionLostException {
 		driveDirect(150, -150);
-		SystemClock.sleep(1450);
+		SystemClock.sleep(1500);
 		stop();
 	}
 
-	public void turnAround() throws ConnectionLostException {
-		turnRight();
-		turnRight();
+	public void turnAround() throws ConnectionLostException,
+			InterruptedException {
+		if (getLeftDistance() <= getRightDistance()) {
+			turnRight();
+			turnRight();
+		} else {
+			turnLeft();
+			turnLeft();
+		}
 	}
 
 	public void michaelsFollowStraightWall(int speed, String side, int sleepTime)
